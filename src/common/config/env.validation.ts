@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsUrl, IsEnum, validateSync } from 'class-validator';
+import { IsString, IsInt, IsEnum, validateSync } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
 enum Environment {
@@ -14,7 +14,7 @@ class EnvironmentVariables {
   @IsInt()
   PORT!: number;
 
-  @IsUrl({ require_tld: false })
+  @IsString()
   DATABASE_URL!: string;
 
   @IsString()

@@ -4,6 +4,7 @@ import { validate } from '@common/config/env.validation';
 import { PrismaService } from '@core/prisma.service';
 import { RedisService } from '@core/redis.service';
 import { LoggerService } from '@core/logger.service';
+import { HealthController } from '@presentation/health.controller';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { LoggerService } from '@core/logger.service';
       validate,
     }),
   ],
+  controllers: [HealthController],
   providers: [PrismaService, RedisService, LoggerService],
   exports: [PrismaService, RedisService, LoggerService],
 })
