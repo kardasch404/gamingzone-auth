@@ -1,0 +1,88 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(dbgenerated("uuid_generate_v7()"))
+  email         String        @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  phone         String?       @unique
+  isActive      Boolean       @default(true)
+  emailVerified Boolean       @default(false)
+  phoneVerified Boolean       @default(false)
+  lastLogin     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  roleId        String
+  role          Role          @relation(fields: [roleId], references: [id])
+  sessions      Session[]
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(dbgenerated("uuid_generate_v7()"))
+  name        String       @unique
+  code        String       @unique
+  description String?
+  isSystem    Boolean      @default(false)
+  priority    Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  users       User[]
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(dbgenerated("uuid_generate_v7()"))
+  resource    String
+  action      String
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  roles       Role[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("uuid_generate_v7()"))
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique
+  refreshToken String   @unique
+  ipAddress    String
+  userAgent    String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String   @id @default(dbgenerated("uuid_generate_v7()"))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  resource  String?
+  metadata  Json?
+  ipAddress String
+  userAgent String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@map("activity_logs")
+}
