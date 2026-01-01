@@ -3,6 +3,7 @@ dist/
 .env
 .env.local
 *.log
+logs/
 coverage/
 .DS_Store
 .vscode/
