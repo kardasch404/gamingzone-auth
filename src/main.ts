@@ -3,9 +3,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { GlobalExceptionFilter } from '@common/filters/global-exception.filter';
+import { LoggerService } from '@core/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const logger = app.get(LoggerService);
+  app.useGlobalFilters(new GlobalExceptionFilter(logger));
 
   app.use(helmet());
   app.enableCors();
