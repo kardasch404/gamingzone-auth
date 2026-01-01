@@ -1,0 +1,49 @@
+name: CD Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: docker build -t gamingzone/auth-service:${{ steps.version.outputs.VERSION }} .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker push gamingzone/auth-service:${{ steps.version.outputs.VERSION }}
+          docker tag gamingzone/auth-service:${{ steps.version.outputs.VERSION }} gamingzone/auth-service:latest
+          docker push gamingzone/auth-service:latest
+
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v4
+        with:
+          namespace: gamingzone
+          manifests: |
+            k8s/configmap.yaml
+            k8s/secret.yaml
+            k8s/deployment.yaml
+            k8s/service.yaml
+            k8s/hpa.yaml
+          images: gamingzone/auth-service:${{ steps.version.outputs.VERSION }}
+          strategy: blue-green
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f http://auth-service.gamingzone.svc.cluster.local:42110/api/v1/health || exit 1
