@@ -56,3 +56,33 @@ model Permission {
   @@unique([resource, action])
   @@map("permissions")
 }
+
+model Session {
+  id           String   @id @default(dbgenerated("uuid_generate_v7()"))
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique
+  refreshToken String   @unique
+  ipAddress    String
+  userAgent    String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String   @id @default(dbgenerated("uuid_generate_v7()"))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  resource  String?
+  metadata  Json?
+  ipAddress String
+  userAgent String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@map("activity_logs")
+}
