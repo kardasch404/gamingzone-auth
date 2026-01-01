@@ -44,16 +44,16 @@ export class PermissionsGuard implements CanActivate {
         },
       });
 
-      permissions = userWithRole?.role.permissions.map(
-        (p) => `${p.resource}:${p.action}`,
-      ) || [];
+      permissions =
+        userWithRole?.role.permissions.map(
+          (p: { resource: string; action: string }) => `${p.resource}:${p.action}`,
+        ) || [];
 
       await this.redis.set(cacheKey, permissions, 300);
     }
 
-    const hasPermission = permissions.includes(
-      `${requiredPermission.resource}:${requiredPermission.action}`,
-    );
+    const hasPermission =
+      permissions?.includes(`${requiredPermission.resource}:${requiredPermission.action}`) || false;
 
     if (!hasPermission) {
       throw new ForbiddenException('Insufficient permissions');

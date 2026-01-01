@@ -20,6 +20,7 @@ services:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       JWT_SECRET: dev-secret-key-change-in-production
       JWT_EXPIRATION: 1h
+      REFRESH_TOKEN_EXPIRATION: 7d
     volumes:
       - ./src:/app/src
     networks:
