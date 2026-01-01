@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: gamingzone-auth
+    ports:
+      - '42110:42110'
+    depends_on:
+      - postgres-auth
+      - redis
+      - rabbitmq
+    environment:
+      NODE_ENV: development
+      PORT: 42110
+      DATABASE_URL: postgresql://gamingzone:secure_password@postgres-auth:5432/auth_db
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: dev-secret-key-change-in-production
+      JWT_EXPIRATION: 1h
+    volumes:
+      - ./src:/app/src
+    networks:
+      - gamingzone-network
+
+  postgres-auth:
+    image: postgres:15-alpine
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: gamingzone
+      POSTGRES_PASSWORD: secure_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - gamingzone-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - gamingzone-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - gamingzone-network
+
+volumes:
+  postgres-auth-data:
+  redis-data:
+  rabbitmq-data:
+
+networks:
+  gamingzone-network:
+    driver: bridge
