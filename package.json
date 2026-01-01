@@ -26,6 +26,7 @@
     "@nestjs/platform-express": "^10.3.0",
     "@nestjs/swagger": "^7.2.0",
     "@prisma/client": "^5.8.0",
+    "@types/uuid": "^10.0.0",
     "amqplib": "^0.10.3",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
