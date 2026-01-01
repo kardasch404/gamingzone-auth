@@ -1,9 +1,11 @@
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv7 } from 'uuidv7';
 
 export function generateId(): string {
-  return uuidv4();
+  return uuidv7();
 }
 
-export function getTimestampFromId(): number {
-  return Date.now();
+export function getTimestampFromId(uuid: string): number {
+  const hex = uuid.replace(/-/g, '');
+  const timestampHex = hex.substring(0, 12);
+  return parseInt(timestampHex, 16);
 }
