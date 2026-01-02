@@ -31,6 +31,15 @@ class EnvironmentVariables {
 
   @IsString()
   REFRESH_TOKEN_EXPIRATION!: string;
+
+  @IsString()
+  SENDGRID_API_KEY!: string;
+
+  @IsString()
+  EMAIL_FROM!: string;
+
+  @IsString()
+  FRONTEND_URL!: string;
 }
 
 export function validate(config: Record<string, unknown>) {

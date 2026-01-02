@@ -1,5 +1,5 @@
 export class UserRegisteredEvent {
-  userId: string;
-  email: string;
-  verificationCode: string;
+  userId!: string;
+  email!: string;
+  verificationCode!: string;
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { EventPattern } from '@nestjs/microservices';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Inject } from '@nestjs/common';
 import { EmailService } from '../email/email.service.interface';
 import { UserRegisteredEvent } from './user-registered.event';
 import { LoggerService } from '@core/logger.service';
@@ -7,11 +8,11 @@ import { LoggerService } from '@core/logger.service';
 @Injectable()
 export class UserRegisteredListener {
   constructor(
-    private readonly emailService: EmailService,
+    @Inject('EmailService') private readonly emailService: EmailService,
     private readonly logger: LoggerService,
   ) {}
 
-  @EventPattern('user.registered')
+  @OnEvent('user.registered')
   async handleUserRegistered(payload: UserRegisteredEvent): Promise<void> {
     const { userId, email, verificationCode } = payload;
 
@@ -24,7 +25,7 @@ export class UserRegisteredListener {
     } catch (error) {
       this.logger.error(
         `Failed to send verification email for user ${userId}`,
-        error.stack,
+        (error as Error).stack,
         'UserRegisteredListener',
       );
     }

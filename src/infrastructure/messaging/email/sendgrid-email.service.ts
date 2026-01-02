@@ -39,7 +39,7 @@ export class SendGridEmailService implements EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send verification email to ${to}`,
-        error.stack,
+        (error as Error).stack,
         'SendGridEmailService',
       );
       throw error;
@@ -67,7 +67,7 @@ export class SendGridEmailService implements EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send welcome email to ${to}`,
-        error.stack,
+        (error as Error).stack,
         'SendGridEmailService',
       );
       throw error;
@@ -99,7 +99,7 @@ export class SendGridEmailService implements EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send password reset email to ${to}`,
-        error.stack,
+        (error as Error).stack,
         'SendGridEmailService',
       );
       throw error;

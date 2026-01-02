@@ -1,4 +1,5 @@
 import { Injectable, ConflictException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterUserCommand } from '../register-user.command';
 import { UserRepository } from '@domain/repositories/user.repository.interface';
 import { RedisService } from '@core/redis.service';
@@ -7,6 +8,7 @@ import { Email } from '@domain/value-objects/email.vo';
 import { Password } from '@domain/value-objects/password.vo';
 import { User } from '@domain/entities/user.entity';
 import { generateId } from '@common/utils/uuid.util';
+import { UserRegisteredEvent } from '@infrastructure/messaging/events/user-registered.event';
 
 export interface RegisterUserResponse {
   id: string;
@@ -22,6 +24,7 @@ export class RegisterUserHandler {
     private readonly userRepository: UserRepository,
     private readonly redis: RedisService,
     private readonly logger: LoggerService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(command: RegisterUserCommand): Promise<RegisterUserResponse> {
@@ -69,11 +72,16 @@ export class RegisterUserHandler {
     const redisKey = `email-verification:${savedUser.id}`;
     await this.redis.set(redisKey, verificationCode, 300);
 
-    // 10. Log event (TODO: Replace with EventBus)
-    this.logger.log('User registered', {
+    // 10. Emit user.registered event
+    const event = new UserRegisteredEvent();
+    event.userId = savedUser.id;
+    event.email = savedUser.email;
+    event.verificationCode = verificationCode;
+    this.eventEmitter.emit('user.registered', event);
+
+    this.logger.log('User registered event emitted', {
       userId: savedUser.id,
       email: savedUser.email,
-      verificationCode,
     });
 
     // 11. Return response (without sensitive data)
