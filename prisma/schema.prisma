@@ -75,16 +75,15 @@ model Session {
 
 model ActivityLog {
   id        String   @id @default(dbgenerated("uuid_generate_v7()"))
-  userId    String
+  userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
   resource  String?
   metadata  Json?
-  ipAddress String
-  userAgent String
-  createdAt DateTime @default(now())
+  ipAddress String   @map("ip_address")
+  userAgent String   @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([userId])
-  @@index([action])
+  @@index([userId, createdAt])
   @@map("activity_logs")
 }
