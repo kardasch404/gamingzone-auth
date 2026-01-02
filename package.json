@@ -12,8 +12,11 @@
     "test": "jest",
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:setup": "docker-compose -f docker-compose.test.yml up -d && sleep 3 && npm run prisma:migrate:test",
+    "test:e2e:teardown": "docker-compose -f docker-compose.test.yml down -v",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate deploy",
     "prepare": "husky install"
   },
   "dependencies": {
