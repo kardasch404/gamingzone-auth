@@ -1,5 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Req, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Req,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { RegisterUserCommand } from '@application/commands/register-user.command';
 import { RegisterUserHandler } from '@application/commands/handlers/register-user.handler';
@@ -9,7 +18,13 @@ import { LoginUserCommand } from '@application/commands/login-user.command';
 import { LoginUserHandler } from '@application/commands/handlers/login-user.handler';
 import { RefreshTokenCommand } from '@application/commands/refresh-token.command';
 import { RefreshTokenHandler } from '@application/commands/handlers/refresh-token.handler';
+import { LogoutUserCommand } from '@application/commands/logout-user.command';
+import { LogoutUserHandler } from '@application/commands/handlers/logout-user.handler';
 import { RateLimitGuard } from '@common/guards/rate-limit.guard';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { User } from '@domain/entities/user.entity';
+import { LogoutDto } from '../dto/logout.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -19,6 +34,7 @@ export class AuthController {
     private readonly verifyEmailHandler: VerifyEmailHandler,
     private readonly loginUserHandler: LoginUserHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
+    private readonly logoutUserHandler: LogoutUserHandler,
   ) {}
 
   @Post('register')
@@ -111,5 +127,33 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refreshToken(@Body() dto: RefreshTokenCommand) {
     return await this.refreshTokenHandler.execute(dto);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Logged out successfully',
+    schema: {
+      example: {
+        message: 'Logged out successfully',
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async logout(
+    @CurrentUser() user: User,
+    @Body() dto: LogoutDto,
+    @Headers('authorization') authHeader: string,
+  ) {
+    const token = authHeader?.replace('Bearer ', '');
+    const command = new LogoutUserCommand();
+    command.userId = user.id;
+    command.token = token;
+    command.allDevices = dto.allDevices;
+    return await this.logoutUserHandler.execute(command);
   }
 }
