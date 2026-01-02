@@ -35,7 +35,7 @@ export class PrismaUserRepository implements UserRepository {
       return PrismaUserMapper.toDomain(created);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
+        if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2002') {
           throw new ConflictException('Email already exists');
         }
       }
@@ -62,7 +62,7 @@ export class PrismaUserRepository implements UserRepository {
       return PrismaUserMapper.toDomain(updated);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
+        if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2025') {
           throw new NotFoundException('User not found');
         }
       }
@@ -77,7 +77,7 @@ export class PrismaUserRepository implements UserRepository {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
+        if ((error as Prisma.PrismaClientKnownRequestError).code === 'P2025') {
           throw new NotFoundException('User not found');
         }
       }
