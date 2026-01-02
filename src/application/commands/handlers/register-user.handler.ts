@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RegisterUserCommand } from '../register-user.command';
 import { UserRepository } from '@domain/repositories/user.repository.interface';
@@ -21,7 +21,7 @@ export interface RegisterUserResponse {
 @Injectable()
 export class RegisterUserHandler {
   constructor(
-    private readonly userRepository: UserRepository,
+    @Inject('UserRepository') private readonly userRepository: UserRepository,
     private readonly redis: RedisService,
     private readonly logger: LoggerService,
     private readonly eventEmitter: EventEmitter2,

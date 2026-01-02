@@ -9,20 +9,14 @@ import { LoggerService } from '@core/logger.service';
 import { SendGridEmailService } from '@infrastructure/messaging/email/sendgrid-email.service';
 import { UserRegisteredListener } from '@infrastructure/messaging/events/user-registered.listener';
 
-const USER_REPOSITORY = 'UserRepository';
-
 @Module({
   imports: [EventEmitterModule.forRoot()],
   controllers: [AuthController],
   providers: [
     RegisterUserHandler,
     {
-      provide: USER_REPOSITORY,
-      useClass: PrismaUserRepository,
-    },
-    {
       provide: 'UserRepository',
-      useExisting: USER_REPOSITORY,
+      useClass: PrismaUserRepository,
     },
     {
       provide: 'EmailService',

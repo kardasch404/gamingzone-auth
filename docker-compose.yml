@@ -21,6 +21,9 @@ services:
       JWT_SECRET: dev-secret-key-change-in-production
       JWT_EXPIRATION: 1h
       REFRESH_TOKEN_EXPIRATION: 7d
+      SENDGRID_API_KEY: your-sendgrid-api-key-here
+      EMAIL_FROM: noreply@gamingzone.com
+      FRONTEND_URL: http://localhost:3000
     volumes:
       - ./src:/app/src
     networks:
