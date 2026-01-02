@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: postgres-auth-test
+    environment:
+      POSTGRES_DB: auth_test_db
+      POSTGRES_USER: gamingzone_test
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - '5433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - gamingzone-test-network
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: redis-test
+    command: redis-server --appendonly no
+    ports:
+      - '6380:6379'
+    tmpfs:
+      - /data
+    networks:
+      - gamingzone-test-network
+
+networks:
+  gamingzone-test-network:
+    driver: bridge
