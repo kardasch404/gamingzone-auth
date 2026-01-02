@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { PrismaService } from '@core/prisma.service';
-import { AppModule } from '@src/app.module';
+import { AppModule } from '../../../src/app.module';
 import { Password } from '@domain/value-objects/password.vo';
 
 describe('Login Integration Tests', () => {
