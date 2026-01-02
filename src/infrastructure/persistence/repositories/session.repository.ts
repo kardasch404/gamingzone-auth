@@ -21,11 +21,29 @@ export class PrismaSessionRepository implements SessionRepository {
     return session ? PrismaSessionMapper.toDomain(session) : null;
   }
 
+  async findByRefreshToken(refreshToken: string): Promise<Session | null> {
+    const session = await this.prisma.session.findUnique({
+      where: { refreshToken },
+    });
+    return session ? PrismaSessionMapper.toDomain(session) : null;
+  }
+
   async findByUserId(userId: string): Promise<Session[]> {
     const sessions = await this.prisma.session.findMany({
       where: { userId },
     });
     return sessions.map(PrismaSessionMapper.toDomain);
+  }
+
+  async update(id: string, data: Partial<Session>): Promise<Session> {
+    const updated = await this.prisma.session.update({
+      where: { id },
+      data: {
+        token: data.token,
+        refreshToken: data.refreshToken,
+      },
+    });
+    return PrismaSessionMapper.toDomain(updated);
   }
 
   async deleteById(id: string): Promise<void> {
