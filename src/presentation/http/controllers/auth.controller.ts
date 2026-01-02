@@ -1,9 +1,13 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Request } from 'express';
 import { RegisterUserCommand } from '@application/commands/register-user.command';
 import { RegisterUserHandler } from '@application/commands/handlers/register-user.handler';
 import { VerifyEmailCommand } from '@application/commands/verify-email.command';
 import { VerifyEmailHandler } from '@application/commands/handlers/verify-email.handler';
+import { LoginUserCommand } from '@application/commands/login-user.command';
+import { LoginUserHandler } from '@application/commands/handlers/login-user.handler';
+import { RateLimitGuard } from '@common/guards/rate-limit.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -11,6 +15,7 @@ export class AuthController {
   constructor(
     private readonly registerUserHandler: RegisterUserHandler,
     private readonly verifyEmailHandler: VerifyEmailHandler,
+    private readonly loginUserHandler: LoginUserHandler,
   ) {}
 
   @Post('register')
@@ -51,5 +56,38 @@ export class AuthController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async verifyEmail(@Body() command: VerifyEmailCommand) {
     return await this.verifyEmailHandler.execute(command);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @ApiOperation({ summary: 'User login' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: {
+      example: {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        expiresIn: 900,
+        user: {
+          id: '01234567-89ab-cdef-0123-456789abcdef',
+          email: 'user@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          roleId: 'role-id',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 403, description: 'Account deactivated or email not verified' })
+  @ApiResponse({ status: 429, description: 'Too many login attempts' })
+  async login(@Body() dto: LoginUserCommand, @Req() req: Request) {
+    const ipAddress = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    dto.ipAddress = ipAddress;
+    dto.userAgent = userAgent;
+    return await this.loginUserHandler.execute(dto);
   }
 }
