@@ -7,6 +7,8 @@ import { VerifyEmailCommand } from '@application/commands/verify-email.command';
 import { VerifyEmailHandler } from '@application/commands/handlers/verify-email.handler';
 import { LoginUserCommand } from '@application/commands/login-user.command';
 import { LoginUserHandler } from '@application/commands/handlers/login-user.handler';
+import { RefreshTokenCommand } from '@application/commands/refresh-token.command';
+import { RefreshTokenHandler } from '@application/commands/handlers/refresh-token.handler';
 import { RateLimitGuard } from '@common/guards/rate-limit.guard';
 
 @ApiTags('Authentication')
@@ -16,6 +18,7 @@ export class AuthController {
     private readonly registerUserHandler: RegisterUserHandler,
     private readonly verifyEmailHandler: VerifyEmailHandler,
     private readonly loginUserHandler: LoginUserHandler,
+    private readonly refreshTokenHandler: RefreshTokenHandler,
   ) {}
 
   @Post('register')
@@ -89,5 +92,24 @@ export class AuthController {
     dto.ipAddress = ipAddress;
     dto.userAgent = userAgent;
     return await this.loginUserHandler.execute(dto);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    schema: {
+      example: {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        expiresIn: 900,
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  async refreshToken(@Body() dto: RefreshTokenCommand) {
+    return await this.refreshTokenHandler.execute(dto);
   }
 }
