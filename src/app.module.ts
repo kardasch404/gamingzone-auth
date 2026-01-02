@@ -5,6 +5,7 @@ import { PrismaService } from '@core/prisma.service';
 import { RedisService } from '@core/redis.service';
 import { LoggerService } from '@core/logger.service';
 import { HealthController } from '@presentation/health.controller';
+import { AuthModule } from '@presentation/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { HealthController } from '@presentation/health.controller';
       envFilePath: '.env',
       validate,
     }),
+    AuthModule,
   ],
   controllers: [HealthController],
   providers: [PrismaService, RedisService, LoggerService],
