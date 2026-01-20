@@ -2,7 +2,7 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { RegisterUserDto } from '../dto/register-user.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
-import * as bcrypt from 'bcrypt';
+import { PasswordHasher } from '../../shared/utils/password-hasher.util';
 
 @Injectable()
 export class RegisterUseCase {
@@ -14,7 +14,7 @@ export class RegisterUseCase {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await PasswordHasher.hash(dto.password);
 
     const user = await this.userRepository.create({
       email: dto.email,
