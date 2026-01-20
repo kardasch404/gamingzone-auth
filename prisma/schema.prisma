@@ -36,6 +36,8 @@ model Role {
   users       UserRole[]
   permissions RolePermission[]
 
+  @@index([name])
+  @@index([isSystem])
   @@map("roles")
 }
 
@@ -49,6 +51,8 @@ model Permission {
   roles      RolePermission[]
 
   @@unique([resource, action])
+  @@index([resource])
+  @@index([action])
   @@map("permissions")
 }
 
