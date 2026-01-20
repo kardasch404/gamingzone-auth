@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { IRoleRepository } from '../../domain/interfaces/role-repository.interface';
 import { Role } from '../../domain/entities/role.entity';
 import { PrismaService } from './prisma.service';
+import { UuidGenerator } from '../../shared/utils/uuid-generator.util';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(role: Partial<Role>): Promise<Role> {
-    return this.prisma.role.create({ data: role as any });
+    return this.prisma.role.create({ 
+      data: { 
+        id: UuidGenerator.generate(),
+        ...role 
+      } as any 
+    });
   }
 
   async findById(id: string): Promise<Role | null> {

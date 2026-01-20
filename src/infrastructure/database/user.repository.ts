@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { User } from '../../domain/entities/user.entity';
 import { PrismaService } from './prisma.service';
+import { UuidGenerator } from '../../shared/utils/uuid-generator.util';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(user: Partial<User>): Promise<User> {
-    return this.prisma.user.create({ data: user as any });
+    return this.prisma.user.create({ 
+      data: { 
+        id: UuidGenerator.generate(),
+        ...user 
+      } as any 
+    });
   }
 
   async findById(id: string): Promise<User | null> {

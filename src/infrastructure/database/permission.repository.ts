@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { IPermissionRepository } from '../../domain/interfaces/permission-repository.interface';
 import { Permission } from '../../domain/entities/permission.entity';
 import { PrismaService } from './prisma.service';
+import { UuidGenerator } from '../../shared/utils/uuid-generator.util';
 
 @Injectable()
 export class PermissionRepository implements IPermissionRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(permission: Partial<Permission>): Promise<Permission> {
-    return this.prisma.permission.create({ data: permission as any });
+    return this.prisma.permission.create({ 
+      data: { 
+        id: UuidGenerator.generate(),
+        ...permission 
+      } as any 
+    });
   }
 
   async findById(id: string): Promise<Permission | null> {
