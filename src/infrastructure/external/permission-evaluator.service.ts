@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IPermissionEvaluator } from '../../application/ports/permission-evaluator.interface';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
 import { PrismaService } from '../database/prisma.service';
+import { ConditionEvaluator } from '../../shared/utils/condition-evaluator.util';
 
 @Injectable()
 export class PermissionEvaluator implements IPermissionEvaluator {
@@ -55,16 +56,6 @@ export class PermissionEvaluator implements IPermissionEvaluator {
   }
 
   evaluateConditions(conditions: any, context: any): boolean {
-    if (!conditions || !context) return true;
-
-    for (const [key, value] of Object.entries(conditions)) {
-      if (key === 'userId' && context.userId !== value) return false;
-      if (key === 'ownerId' && context.ownerId !== value) return false;
-      if (key === 'status' && context.status !== value) return false;
-      if (key === 'minAmount' && context.amount < value) return false;
-      if (key === 'maxAmount' && context.amount > value) return false;
-    }
-
-    return true;
+    return ConditionEvaluator.evaluate(conditions, context);
   }
 }
