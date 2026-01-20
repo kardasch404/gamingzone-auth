@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(dbgenerated("uuid_generate_v7()"))
-  email     String   @unique
-  password  String
-  firstname String
-  lastname  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  roles     UserRole[]
+  id            String         @id @default(dbgenerated("uuid_generate_v7()"))
+  email         String         @unique
+  password      String
+  firstname     String
+  lastname      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
 }
@@ -76,4 +77,17 @@ model RolePermission {
 
   @@id([roleId, permissionId])
   @@map("role_permissions")
+}
+
+model RefreshToken {
+  id        String   @id @default(dbgenerated("uuid_generate_v7()"))
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
 }
