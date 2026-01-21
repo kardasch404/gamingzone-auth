@@ -22,3 +22,11 @@ export class RoleMapper {
     };
   }
 }
+ return {
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      isSystem: role.isSystem,
+      updatedAt: role.updatedAt,
+    };
+  }
