@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../decorators/roles.decorator';
@@ -6,6 +7,8 @@ import { IPermissionRepository } from '../../../domain/interfaces/permission-rep
 import { Permission } from '../../../domain/entities/permission.entity';
 import { generateId } from '../../../shared/utils/uuid.util';
 
+@ApiTags('Permissions')
+@ApiBearerAuth()
 @Controller('permissions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')

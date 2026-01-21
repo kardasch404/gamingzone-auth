@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../decorators/roles.decorator';
@@ -18,6 +19,8 @@ import { AssignPermissionsDto } from '../../../application/dto/request/assign-pe
 import { RoleResponseDto } from '../../../application/dto/response/role-response.dto';
 import { IRoleRepository } from '../../../domain/interfaces/role-repository.interface';
 
+@ApiTags('Roles')
+@ApiBearerAuth()
 @Controller('roles')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')

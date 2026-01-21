@@ -1,4 +1,5 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RegisterUserUseCase } from '../../../application/use-cases/commands/register-user.use-case';
 import { LoginUseCase } from '../../../application/use-cases/commands/login.use-case';
 import { RefreshTokenUseCase } from '../../../application/use-cases/commands/refresh-token.use-case';
@@ -12,6 +13,7 @@ import { LoginDto } from '../../../application/dto/request/login.dto';
 import { UserResponseDto } from '../../../application/dto/response/user-response.dto';
 import { AuthResponseDto } from '../../../application/dto/response/auth-response.dto';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -22,6 +24,9 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully', type: UserResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid input or user already exists' })
   async register(@Body() dto: RegisterUserDto): Promise<UserResponseDto> {
     const command = new RegisterUserCommand(dto.email, dto.password, dto.firstName, dto.lastName);
     return this.registerUserUseCase.execute(command);
@@ -29,6 +34,9 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login user' })
+  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     const command = new LoginCommand(dto.email, dto.password);
     return this.loginUseCase.execute(command);
@@ -36,6 +44,9 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refresh(@Body('refreshToken') refreshToken: string): Promise<AuthResponseDto> {
     const command = new RefreshTokenCommand(refreshToken);
     return this.refreshTokenUseCase.execute(command);
@@ -43,6 +54,8 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({ status: 204, description: 'Logout successful' })
   async logout(@Body('refreshToken') refreshToken: string): Promise<void> {
     const command = new LogoutCommand(refreshToken);
     await this.logoutUseCase.execute(command);
