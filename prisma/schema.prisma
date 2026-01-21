@@ -28,6 +28,9 @@ model User {
   userRoles     UserRole[]
   refreshTokens RefreshToken[]
 
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -48,6 +51,8 @@ model Role {
   rolePermissions RolePermission[]
   userRoles       UserRole[]
 
+  @@index([name])
+  @@index([isSystem])
   @@map("roles")
 }
 
@@ -61,6 +66,8 @@ model Permission {
   rolePermissions RolePermission[]
 
   @@unique([resource, action])
+  @@index([resource])
+  @@index([action])
   @@map("permissions")
 }
 
@@ -95,5 +102,7 @@ model RefreshToken {
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([expiresAt])
   @@map("refresh_tokens")
 }
