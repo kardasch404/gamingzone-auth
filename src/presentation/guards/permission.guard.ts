@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from '../decorators/check-permission.decorator';
 import { PermissionEvaluator } from '../../infrastructure/authorization/permission-evaluator.service';
@@ -19,15 +19,23 @@ export class PermissionGuard implements CanActivate {
     if (!permission) return true;
 
     const request = context.switchToHttp().getRequest();
-    const userId = request.user?.id;
+    const userId = request.user?.sub;
 
-    if (!userId) return false;
+    if (!userId) {
+      throw new ForbiddenException('User not authenticated');
+    }
 
-    return this.permissionEvaluator.hasPermission(
+    const hasPermission = await this.permissionEvaluator.hasPermission(
       userId,
       permission.resource,
       permission.action,
       request.body || {},
     );
+
+    if (!hasPermission) {
+      throw new ForbiddenException(`Missing permission: ${permission.resource}:${permission.action}`);
+    }
+
+    return true;
   }
 }
