@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (UserResponse);
+  rpc GetUserPermissions(GetUserPermissionsRequest) returns (PermissionsResponse);
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string userId = 2;
+  repeated string roles = 3;
+}
+
+message GetUserByIdRequest {
+  string userId = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string status = 3;
+  repeated string roles = 4;
+}
+
+message GetUserPermissionsRequest {
+  string userId = 1;
+}
+
+message PermissionsResponse {
+  repeated Permission permissions = 1;
+}
+
+message Permission {
+  string resource = 1;
+  string action = 2;
+  string conditions = 3;
+}
+
+message CheckPermissionRequest {
+  string userId = 1;
+  string resource = 2;
+  string action = 3;
+  string context = 4;
+}
+
+message CheckPermissionResponse {
+  bool allowed = 1;
+  string reason = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+}
