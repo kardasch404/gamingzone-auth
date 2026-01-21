@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { IPermissionRepository } from '../../../domain/interfaces/permission-repository.interface';
-import { RedisService } from '../../cache/redis/redis.service';
-import { PermissionCondition } from '../../../domain/value-objects/permission-condition.vo';
+import { IPermissionRepository } from '../../domain/interfaces/permission-repository.interface';
+import { RedisService } from '../cache/redis/redis.service';
+import { PermissionCondition } from '../../domain/value-objects/permission-condition.vo';
 
 @Injectable()
 export class PermissionEvaluator {
