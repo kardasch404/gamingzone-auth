@@ -37,3 +37,29 @@ enum UserStatus {
   SUSPENDED
   DELETED
 }
+
+model Role {
+  id              String           @id @default(dbgenerated("uuid_generate_v7()"))
+  name            String           @unique
+  description     String?
+  isSystem        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              String           @id @default(dbgenerated("uuid_generate_v7()"))
+  resource        String
+  action          String
+  conditions      Json?
+  description     String?
+  createdAt       DateTime         @default(now())
+  rolePermissions RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
