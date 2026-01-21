@@ -1,5 +1,6 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { RegisterUserUseCase } from '../../../application/use-cases/commands/register-user.use-case';
 import { LoginUseCase } from '../../../application/use-cases/commands/login.use-case';
 import { RefreshTokenUseCase } from '../../../application/use-cases/commands/refresh-token.use-case';
@@ -34,9 +35,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     const command = new LoginCommand(dto.email, dto.password);
     return this.loginUseCase.execute(command);
