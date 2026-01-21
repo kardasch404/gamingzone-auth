@@ -1,33 +1,31 @@
 import * as bcrypt from 'bcrypt';
+import { BadRequestException } from '@nestjs/common';
 
 export class Password {
-  private readonly value: string;
+  private readonly hashedValue: string;
+  private static readonly SALT_ROUNDS = 12;
 
-  private constructor(hashedPassword: string) {
-    this.value = hashedPassword;
+  private constructor(hashedValue: string) {
+    this.hashedValue = hashedValue;
   }
 
-  static async create(plainPassword: string): Promise<Password> {
-    this.validate(plainPassword);
-    const hashed = await bcrypt.hash(plainPassword, 10);
+  static async fromPlainText(plainPassword: string): Promise<Password> {
+    if (!plainPassword || plainPassword.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters');
+    }
+    const hashed = await bcrypt.hash(plainPassword, Password.SALT_ROUNDS);
     return new Password(hashed);
   }
 
-  static fromHash(hashedPassword: string): Password {
-    return new Password(hashedPassword);
+  static fromHash(hashedValue: string): Password {
+    return new Password(hashedValue);
   }
 
-  private static validate(password: string): void {
-    if (!password || password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
-    }
-  }
-
-  async compare(plainPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainPassword, this.value);
+  static async compare(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(plainPassword, hashedPassword);
   }
 
   getValue(): string {
-    return this.value;
+    return this.hashedValue;
   }
 }

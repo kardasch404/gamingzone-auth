@@ -1,20 +1,18 @@
+import { BadRequestException } from '@nestjs/common';
+
 export class Email {
   private readonly value: string;
 
   constructor(email: string) {
-    this.validate(email);
+    if (!this.isValid(email)) {
+      throw new BadRequestException('Invalid email format');
+    }
     this.value = email.toLowerCase().trim();
   }
 
-  private validate(email: string): void {
+  private isValid(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      throw new Error('Invalid email format');
-    }
-  }
-
-  getValue(): string {
-    return this.value;
+    return emailRegex.test(email);
   }
 
   equals(other: Email): boolean {
@@ -22,6 +20,10 @@ export class Email {
   }
 
   toString(): string {
+    return this.value;
+  }
+
+  getValue(): string {
     return this.value;
   }
 }
