@@ -11,36 +11,48 @@ export enum ConditionOperator {
 }
 
 export interface ConditionRule {
-  field: string;
-  operator: ConditionOperator;
-  value: any;
+  field?: string;
+  operator?: ConditionOperator;
+  value?: any;
+  and?: any[];
+  or?: any[];
+  not?: any;
 }
 
 export class PermissionCondition {
-  private readonly rules: ConditionRule[];
+  private readonly condition: any;
 
   constructor(conditions: Record<string, any> | null) {
-    this.rules = this.parseConditions(conditions);
-  }
-
-  private parseConditions(conditions: Record<string, any> | null): ConditionRule[] {
-    if (!conditions) return [];
-    
-    return Object.entries(conditions).map(([field, config]) => ({
-      field,
-      operator: config.operator as ConditionOperator,
-      value: config.value,
-    }));
+    this.condition = conditions;
   }
 
   evaluate(context: Record<string, any>): boolean {
-    if (this.rules.length === 0) return true;
+    if (!this.condition) return true;
+    return this.evaluateCondition(this.condition, context);
+  }
 
-    return this.rules.every((rule) => this.evaluateRule(rule, context));
+  private evaluateCondition(condition: any, context: Record<string, any>): boolean {
+    // Handle logical operators
+    if (condition.and) {
+      return condition.and.every((c: any) => this.evaluateCondition(c, context));
+    }
+    if (condition.or) {
+      return condition.or.some((c: any) => this.evaluateCondition(c, context));
+    }
+    if (condition.not) {
+      return !this.evaluateCondition(condition.not, context);
+    }
+
+    // Handle comparison operators
+    if (condition.field && condition.operator) {
+      return this.evaluateRule(condition, context);
+    }
+
+    return true;
   }
 
   private evaluateRule(rule: ConditionRule, context: Record<string, any>): boolean {
-    const contextValue = context[rule.field];
+    const contextValue = context[rule.field!];
     const ruleValue = this.resolveValue(rule.value, context);
 
     switch (rule.operator) {
@@ -76,6 +88,6 @@ export class PermissionCondition {
   }
 
   hasConditions(): boolean {
-    return this.rules.length > 0;
+    return this.condition !== null && Object.keys(this.condition).length > 0;
   }
 }
